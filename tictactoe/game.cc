@@ -35,53 +35,47 @@ bool valid_move(char *board, int position) {
    computer ai for defensive block
    parameters: the board
    return: int - position to block
+   todo: make a 2 array off all position iterate through it [[0,1,2], [0,2,1]]
+   todo: refactor board check to another function, the reuse for winning move check
 */
-int computer_ai_block(char *board, Player player_1) {
-    char opponent_symbol = '_';
+int computer_ai(char *board, Player player_1) {
+    char opponent_symbol = 'O';
+    char computer_symbol = 'X';
+    int board_checks[18][3] = {
+        {0,1,2}, {0,2,1}, {1,2,0},
+        {3,4,5}, {3,5,4}, {4,5,3},
+        {6,7,8}, {6,8,7}, {7,8,6},
+        {0,3,6}, {0,6,3}, {3,6,0},
+        {1,4,7}, {1,7,4}, {4,7,1},
+        {2,5,8}, {2,8,5}, {5,8,2}       
+    };
 
+    //switch X O if human is ready player one
     if (player_1 == HUMAN) {
         opponent_symbol = 'X';
-    } else {
-        opponent_symbol = 'O';
+        computer_symbol = 'O';
+    } 
+
+    //check for blocking position
+    for (int i = 0; i < 18; i++) {       
+        // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
+        if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
+            (board[board_checks[i][1]] == opponent_symbol) && 
+            (board[board_checks[i][2]] == '_')) {
+            return board_checks[i][2];
+        }        
     }
 
-    if ((board[0] == board[1]) && (board[1] == opponent_symbol) && (board[2] == '_')) {
-        return 2;
-    } else if ((board[0] == board[2]) && (board[2] == opponent_symbol) && (board[1] == '_')) {
-        return 1;
-    } else if ((board[1] == board[2]) && (board[2] == opponent_symbol) && (board[0] == '_')) {
-        return 0;
-    } else if ((board[3] == board[4]) && (board[4] == opponent_symbol) && (board[5] == '_')) {
-        return 5;
-    } else if ((board[3] == board[5]) && (board[5] == opponent_symbol) && (board[4] == '_')) {
-        return 4;
-    } else if ((board[4] == board[5]) && (board[5] == opponent_symbol) && (board[3] == '_')) {
-        return 3;
-    } else if ((board[6] == board[7]) && (board[7] == opponent_symbol) && (board[8] == '_')) {
-        return 8;
-    } else if ((board[6] == board[8]) && (board[8] == opponent_symbol) && (board[7] == '_')) {
-        return 7;
-    } else if ((board[7] == board[8]) && (board[8] == opponent_symbol) && (board[6] == '_')) {
-        return 6;
-    } else if ((board[0] == board[3]) && (board[3] == opponent_symbol) && (board[6] == '_')) {
-        return 6;
-    } else if ((board[0] == board[6]) && (board[6] == opponent_symbol) && (board[3] == '_')) {
-        return 3;
-    } else if ((board[3] == board[6]) && (board[6] == opponent_symbol) && (board[0] == '_')) {
-        return 0;
-    } else if ((board[1] == board[4]) && (board[4] == opponent_symbol) && (board[7] == '_')) {
-        return 7;
-    } else if ((board[1] == board[7]) && (board[7] == opponent_symbol) && (board[4] == '_')) {
-        return 4;
-    } else if ((board[4] == board[7]) && (board[7] == opponent_symbol) && (board[1] == '_')) {
-        return 1;
-    } else if ((board[2] == board[5]) && (board[5] == opponent_symbol) && (board[8] == '_')) {
-        return 8;
-    } else if ((board[2] == board[8]) && (board[8] == opponent_symbol) && (board[5] == '_')) {
-        return 5;
-    } else if ((board[5] == board[8]) && (board[8] == opponent_symbol) && (board[2] == '_')) {
-        return 2;
-    } 
+    //check for winning position
+    for (int i = 0; i < 18; i++) {       
+        // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
+        if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
+            (board[board_checks[i][1]] == computer_symbol) && 
+            (board[board_checks[i][2]] == '_')) {
+            return board_checks[i][2];
+        }        
+    }
+
     return -1;
 }
 
@@ -92,7 +86,7 @@ int computer_ai_block(char *board, Player player_1) {
 */
 int computer_turn(char *board, Player player_1) {
     int defensive_move = -1;
-    defensive_move = computer_ai_block(board, player_1);
+    defensive_move = computer_ai(board, player_1);
     if (defensive_move == -1) {
         int position = rand() % 9;
         while (!valid_move(board, position)) {
@@ -126,7 +120,7 @@ char check_winner(char *board) {
          return board[2];       
     }  else if ((board[0] == board[4]) && (board[4] == board[8])) {
          return board[0];       
-    }  else if ((board[2] == board[4]) && (board[4] == board[8])) {
+    }  else if ((board[2] == board[4]) && (board[4] == board[6])) {
         return board[2];        
     }   else {
         return '_';
