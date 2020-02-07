@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <ctime>
 std::string double_down = "\n\n";
 enum Player {COMPUTER, HUMAN};
 
@@ -32,6 +33,34 @@ bool valid_move(char *board, int position) {
 }
 
 /* 
+   check board is empty
+   parameters: the board
+   return: true false
+*/
+bool is_board_empty(char *board) {
+    if (board[0] != '_') {
+        return false;
+    } else if (board[1] != '_') {
+        return false;
+    } else if (board[2] != '_') {
+        return false;
+    } else if (board[3] != '_') {
+        return false;
+    } else if (board[4] != '_') {
+        return false;
+    } else if (board[5] != '_') {
+        return false;
+    } else if (board[6] != '_') {
+        return false;
+    } else if (board[7] != '_') {
+        return false;
+    } else if (board[8] != '_') {
+        return false;
+    }
+    return true;
+}
+
+/* 
    computer ai for defensive block
    parameters: the board
    return: int - position to block
@@ -56,21 +85,21 @@ int computer_ai(char *board, Player player_1) {
         computer_symbol = 'O';
     } 
 
-    //check for blocking position
-    for (int i = 0; i < 18; i++) {       
-        // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
-        if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
-            (board[board_checks[i][1]] == opponent_symbol) && 
-            (board[board_checks[i][2]] == '_')) {
-            return board_checks[i][2];
-        }        
-    }
-
     //check for winning position
     for (int i = 0; i < 18; i++) {       
         // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
         if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
             (board[board_checks[i][1]] == computer_symbol) && 
+            (board[board_checks[i][2]] == '_')) {
+            return board_checks[i][2];
+        }        
+    }
+
+    //check for blocking position
+    for (int i = 0; i < 18; i++) {       
+        // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
+        if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
+            (board[board_checks[i][1]] == opponent_symbol) && 
             (board[board_checks[i][2]] == '_')) {
             return board_checks[i][2];
         }        
@@ -85,18 +114,33 @@ int computer_ai(char *board, Player player_1) {
    return: position
 */
 int computer_turn(char *board, Player player_1) {
-    int defensive_move = -1;
-    defensive_move = computer_ai(board, player_1);
-    if (defensive_move == -1) {
-        int position = rand() % 9;
-        while (!valid_move(board, position)) {
-            position = rand() % 9; 
+    int ai_move = -1;
+    srand(time(NULL));
+    int rand_position = -1;    
+    int corner_moves[4] = {0,2,6,8};
+
+    // if computer opening move pick random corner - best first move
+    if (is_board_empty(board)) {
+        while (true) {
+            rand_position = rand() % 9;
+            for (int i = 0; i < 4; i++) {
+                if (rand_position == corner_moves[i]) {
+                    return rand_position;
+                }
+            }
         }
-        std::cout << position;
-        return position;
-    } else {
-        std::cout << defensive_move;
-        return defensive_move;
+    }
+
+    ai_move = computer_ai(board, player_1);
+    if (ai_move == -1) {
+        rand_position = rand() % 9;
+        while (!valid_move(board, rand_position)) {
+            rand_position = rand() % 9; 
+        }
+        std::cout << rand_position;
+        return rand_position;
+    } else {        
+        return ai_move;
     }
 }
 
@@ -155,8 +199,7 @@ char check_tie(char *board) {
     return true;
 }
 
-int main(int argc, const char * argv[]) {
-    
+int main(int argc, const char * argv[]) {    
     Player player_1 = HUMAN;
     Player current_player = HUMAN;
     std::string go_first_answer = "";    
