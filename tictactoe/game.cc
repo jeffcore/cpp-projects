@@ -70,13 +70,15 @@ bool is_board_empty(char *board) {
 int computer_ai(char *board, Player player_1) {
     char opponent_symbol = 'O';
     char computer_symbol = 'X';
-    int board_checks[18][3] = {
+    int board_checks[24][3] = {
         {0,1,2}, {0,2,1}, {1,2,0},
         {3,4,5}, {3,5,4}, {4,5,3},
         {6,7,8}, {6,8,7}, {7,8,6},
         {0,3,6}, {0,6,3}, {3,6,0},
         {1,4,7}, {1,7,4}, {4,7,1},
-        {2,5,8}, {2,8,5}, {5,8,2}       
+        {2,5,8}, {2,8,5}, {5,8,2},
+        {0,4,8}, {4,8,0}, {0,8,4},
+        {2,4,6}, {4,6,2}, {2,6,4}       
     };
 
     //switch X O if human is ready player one
@@ -86,7 +88,7 @@ int computer_ai(char *board, Player player_1) {
     } 
 
     //check for winning position
-    for (int i = 0; i < 18; i++) {       
+    for (int i = 0; i < 24; i++) {       
         // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
         if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
             (board[board_checks[i][1]] == computer_symbol) && 
@@ -96,7 +98,7 @@ int computer_ai(char *board, Player player_1) {
     }
 
     //check for blocking position
-    for (int i = 0; i < 18; i++) {       
+    for (int i = 0; i < 24; i++) {       
         // std::cout << board_checks[i][0] << board_checks[i][1] << board_checks[i][2]<< std::endl;
         if ((board[board_checks[i][0]] == board[board_checks[i][1]]) && 
             (board[board_checks[i][1]] == opponent_symbol) && 
