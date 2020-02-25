@@ -12,6 +12,7 @@ void print_board(char *board) {
             " " << board[3] << " " << board[4] << " " << board[5] << " \n"
             " " << board[6] << " " << board[7] << " " << board[8] + double_down;
 }
+
 /* 
    prints welcome screen at start of game
 */
