@@ -4,6 +4,8 @@ const int BOARD_ROWS = 6;
 const int BOARD_COLUMNS = 7;
 enum Player {COMPUTER, HUMAN};
 
+
+// player move - adds piece to bottomest available square of selected column
 void move(char board[BOARD_ROWS][BOARD_COLUMNS], int column, char piece) {
     int col_index = column - 1;
     if (board[0][col_index] != '_') {
@@ -22,6 +24,7 @@ void move(char board[BOARD_ROWS][BOARD_COLUMNS], int column, char piece) {
     }
 }
 
+// prints board to screen with current state
 void print_board(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     // print board
     std::string board_print = "";
@@ -41,9 +44,118 @@ void print_board(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     std::cout << board_print << std::endl;
 }
 
+// check for winner
+// return: 1 or 0
+int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
+    bool current_match = false;
+    int count_same = 1;
+    const int DIAGONAL_POSITIONS = 6;
+    int rows_diagonal[DIAGONAL_POSITIONS] = {0,0,0,0,1,2};
+    int columns_diagonal[DIAGONAL_POSITIONS] = {3,2,1,0,0,0};    
+    int columns_diagonal_front[DIAGONAL_POSITIONS] = {3,4,5,6,6,6};
+    int row_index = 0;
+    int column_index = 0;
+
+    // diagonal checks
+    for (int i = 0; i < 6; i++) {    
+        current_match = false;
+        count_same = 1;
+        row_index = rows_diagonal[i];
+        column_index = columns_diagonal[i];
+
+        //check for diagonal left to right
+        while ((row_index < BOARD_ROWS-1) && (column_index < BOARD_COLUMNS-1)) {
+            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;
+
+            if ((board[row_index][column_index] == board[row_index+1][column_index+1]) && 
+                    (board[row_index][column_index] != '_')) {
+                current_match = true;
+                count_same += 1;
+            } else {
+                current_match = false;
+                count_same = 1;
+            }
+            
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+
+            row_index += 1;
+            column_index += 1;
+        }
+       
+        current_match = false;
+        count_same = 1;
+        row_index = rows_diagonal[i];
+        column_index = columns_diagonal_front[i];
+       
+        //check for diagonal right to left
+        while ((row_index < BOARD_ROWS-1) && (column_index > 0)) {
+            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;           
+            
+            if ((board[row_index][column_index] == board[row_index+1][column_index-1]) && 
+                    (board[row_index][column_index] != '_')) {                
+                current_match = true;
+                count_same += 1;
+            } else {
+                current_match = false;
+                count_same = 1;
+            }
+
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+            
+            row_index += 1;
+            column_index -= 1;
+        }        
+    }
+
+    current_match = false;
+    count_same = 1;
+    // check for winner by column
+    for (int i = 0; i < BOARD_COLUMNS; i++){        
+        for (int j = 0; j < BOARD_ROWS; j++){    
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+            if ((board[j][i] == board[j+1][i]) && (board[j+1][i] != '_')) {
+                current_match = true;
+                count_same += 1;
+            } else {
+                current_match = false;
+                count_same = 1;
+            }                   
+        }       
+    }
+    
+    current_match = false;
+    count_same = 1;
+    // check for winner by rows
+    for (int i = 0; i < BOARD_ROWS; i++){        
+        for (int j = 0; j < BOARD_COLUMNS; j++){    
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+            if ((board[i][j] == board[i][j+1]) && (board[i][j+1] != '_')) {
+                current_match = true;
+                count_same += 1;
+            } else {
+                current_match = false;
+                count_same = 1;
+            }            
+        }       
+    }
+    
+    return 0;
+}
+
+// returns list of valid moves by column
+// return: array with open index for each column, 
+//          -1 if column is full
 int* valid_moves(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     // board always starts with bottom row as available moves
-    int moves[BOARD_COLUMNS];
+    static int moves[BOARD_COLUMNS];
     for (int i = 0; i < BOARD_COLUMNS; ++i){
         moves[i] = BOARD_ROWS - 1;
     }
@@ -69,6 +181,8 @@ int* valid_moves(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     return moves;
 }
 
+//  checks if move is value
+//  return: true false
 bool is_move_valid(char board[BOARD_ROWS][BOARD_COLUMNS], int move) {
     int *moves = valid_moves(board);
     
@@ -79,116 +193,22 @@ bool is_move_valid(char board[BOARD_ROWS][BOARD_COLUMNS], int move) {
     }
 }
 
-int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
-    bool current_match = false;
-    int count_same = 1;
-    const int DIAGONAL_POSITIONS = 6;
-    int rows_diagonal[DIAGONAL_POSITIONS] = {0,0,0,0,1,2};
-    int columns_diagonal[DIAGONAL_POSITIONS] = {3,2,1,0,0,0};    
-    int columns_diagonal_front[DIAGONAL_POSITIONS] = {3,4,5,6,6,6};
-    int row_index = 0;
-    int column_index = 0;
-
-
-    for (int i = 0; i < 6; i++) {    
-        current_match = false;
-        count_same = 1;
-        row_index = rows_diagonal[i];
-        column_index = columns_diagonal[i];
-
-        //check for diagonal left to right
-        while ((row_index < BOARD_ROWS-1) && (column_index < BOARD_COLUMNS-1)) {
-            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;
-
-            if ((board[row_index][column_index] == board[row_index+1][column_index+1]) && 
-                    (board[row_index][column_index] == 'X')) {
-                // std::cout << "got match";
-                current_match = true;
-                count_same += 1;
-            } else {
-                current_match = false;
-                count_same = 1;
-            }
-            
-            if ((current_match == true) && (count_same == 4)) {
-                return 1;
-            }
-
-            row_index += 1;
-            column_index += 1;
-
+// computer ai move - it sucks right now just random
+int computer_move(char board[BOARD_ROWS][BOARD_COLUMNS]) {
+    int *moves = valid_moves(board);
+    int rand_position = -1;  
+    std::cout << time(NULL);  
+        
+    while (true) {
+        rand_position = (rand() % BOARD_COLUMNS) + 1;
+        std::cout << "radnd " << rand_position;
+        if (moves[rand_position] != -1) {
+            return rand_position;
         }
-        // std::cout << " \n" << std::endl;
-
-        current_match = false;
-        count_same = 1;
-        row_index = rows_diagonal[i];
-        column_index = columns_diagonal_front[i];
-        //check for diagonal  right to left
-        while ((row_index < BOARD_ROWS-1) && (column_index > 0)) {
-            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;           
-            
-            if ((board[row_index][column_index] == board[row_index+1][column_index-1]) && 
-                    (board[row_index][column_index] == 'X')) {
-                // std::cout << "got match";
-                current_match = true;
-                count_same += 1;
-            } else {
-                current_match = false;
-                count_same = 1;
-            }
-
-            if ((current_match == true) && (count_same == 4)) {
-                return 1;
-            }
-            
-            row_index += 1;
-            column_index -= 1;
-        }
-        // std::cout << " \n" << std::endl;
-    }
-
-    current_match = false;
-    count_same = 1;
-    // check for winner by column
-    for (int i = 0; i < BOARD_COLUMNS; i++){        
-        for (int j = 0; j < BOARD_ROWS; j++){    
-            if ((current_match == true) && (count_same == 4)) {
-                return 1;
-            }
-            if ((board[j][i] == board[j+1][i]) && (board[j+1][i] == 'X')) {
-                current_match = true;
-                count_same += 1;
-            } else {
-                current_match = false;
-                count_same = 1;
-            }
-            // std::cout << "i" << i << "j" << j << std::endl;            
-        }       
-    }
-
-    // check for winner by rows
-    current_match = false;
-    count_same = 1;
-    for (int i = 0; i < BOARD_ROWS; i++){        
-        for (int j = 0; j < BOARD_COLUMNS; j++){    
-            if ((current_match == true) && (count_same == 4)) {
-                return 1;
-            }
-            if ((board[i][j] == board[i][j+1]) && (board[i][j+1] == 'X')) {
-                current_match = true;
-                count_same += 1;
-            } else {
-                current_match = false;
-                count_same = 1;
-            }
-            // std::cout << "i" << i << "j" << j << std::endl;            
-        }       
     }
     
-    return 0;
+    return -1;
 }
-
 
 void tests(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     // test winner horizontal
@@ -247,6 +267,7 @@ void print_welcome() {
 }
 
 int main() {    
+    srand(time(0)); 
     Player player_1 = HUMAN;
     Player current_player = HUMAN;
     std::string go_first_answer = ""; 
@@ -285,9 +306,9 @@ int main() {
         }
         
         if (current_player == COMPUTER) {  
-            // board[computer_turn(board, player_1)] = current_symbol;
+            move(board, computer_move(board), current_symbol);
             current_player = HUMAN;
-            // std::cout << "Computer Turn" << std::endl;
+            std::cout << "Computers Selection" << std::endl;
         } else {            
             move_completed = false;
             while (!move_completed) {

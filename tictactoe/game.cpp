@@ -117,8 +117,7 @@ int computer_ai(char *board, Player player_1) {
    return: position
 */
 int computer_turn(char *board, Player player_1) {
-    int ai_move = -1;
-    srand(time(NULL));
+    int ai_move = -1;    
     int rand_position = -1;    
     int corner_moves[4] = {0,2,6,8};
 
@@ -213,6 +212,7 @@ int main(int argc, const char * argv[]) {
     char current_symbol = 'X';
     char winner = '_';
     bool is_tie = false;
+    srand(time(NULL));
 
     print_welcome();
     std::cout << "Do you want to go first? \n (y / n) >> ";
