@@ -2,6 +2,7 @@
 #include <string>
 const int BOARD_ROWS = 6;
 const int BOARD_COLUMNS = 7;
+enum Player {COMPUTER, HUMAN};
 
 void move(char board[BOARD_ROWS][BOARD_COLUMNS], int column, char piece) {
     int col_index = column - 1;
@@ -15,16 +16,19 @@ void move(char board[BOARD_ROWS][BOARD_COLUMNS], int column, char piece) {
             break;
         }
         if (i == BOARD_ROWS - 1) {
-            board[i][col_index] = piece;            
+            board[i][col_index] = piece; 
             break;
         }
     }
 }
 
-void print_board(char board[][BOARD_COLUMNS]) {
+void print_board(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     // print board
     std::string board_print = "";
     int temp_row = 0;
+    std::cout << " Use the below numbers to choose a space:\n"
+        " 1 2 3 4 5 6 7\n";
+
     for (int i = 0; i < BOARD_ROWS; i++){
         if (i != temp_row){
             board_print = board_print + "\n";
@@ -37,7 +41,7 @@ void print_board(char board[][BOARD_COLUMNS]) {
     std::cout << board_print << std::endl;
 }
 
-void valid_moves(char board[BOARD_ROWS][BOARD_COLUMNS]) {
+int* valid_moves(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     // board always starts with bottom row as available moves
     int moves[BOARD_COLUMNS];
     for (int i = 0; i < BOARD_COLUMNS; ++i){
@@ -51,15 +55,28 @@ void valid_moves(char board[BOARD_ROWS][BOARD_COLUMNS]) {
             if (board[j][i] != '_') {     
                 if (j == 0){
                     moves[i] = -1;
-                } else if (moves[i] > j - 1) {
+                } else  {
                     moves[i] = j - 1;
                 }
+                break;
             }
         }       
     }
-    for (int i = 0; i < 7; i++){   
-        std::cout << moves[i]<< std::endl;
+    for (int i = 0; i < BOARD_COLUMNS; i++){   
+        std::cout << moves[i] << " ";
     }    
+    std::cout << " \n" << std::endl;
+    return moves;
+}
+
+bool is_move_valid(char board[BOARD_ROWS][BOARD_COLUMNS], int move) {
+    int *moves = valid_moves(board);
+    
+    if (((move >= 1) and (move <= 7)) && (moves[move-1] != -1)) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
@@ -72,20 +89,20 @@ int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
     int row_index = 0;
     int column_index = 0;
 
+
     for (int i = 0; i < 6; i++) {    
         current_match = false;
         count_same = 1;
         row_index = rows_diagonal[i];
         column_index = columns_diagonal[i];
 
+        //check for diagonal left to right
         while ((row_index < BOARD_ROWS-1) && (column_index < BOARD_COLUMNS-1)) {
-            std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;
-            if ((current_match == true) && (count_same == 4)) {
-                return 1;
-            }
-            
-            if ((board[row_index][column_index] == board[row_index+1][column_index+1]) && (board[row_index][column_index] == 'X')) {
-                std::cout << "got match";
+            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;
+
+            if ((board[row_index][column_index] == board[row_index+1][column_index+1]) && 
+                    (board[row_index][column_index] == 'X')) {
+                // std::cout << "got match";
                 current_match = true;
                 count_same += 1;
             } else {
@@ -93,22 +110,42 @@ int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
                 count_same = 1;
             }
             
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+
             row_index += 1;
             column_index += 1;
 
         }
-        std::cout << " \n" << std::endl;
+        // std::cout << " \n" << std::endl;
 
         current_match = false;
         count_same = 1;
         row_index = rows_diagonal[i];
         column_index = columns_diagonal_front[i];
-        while ((row_index < BOARD_ROWS) && (column_index > -1)) {
-            std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;
+        //check for diagonal  right to left
+        while ((row_index < BOARD_ROWS-1) && (column_index > 0)) {
+            // std::cout << "row idex " << row_index << " column index " << column_index << " " << board[row_index][column_index] << std::endl;           
+            
+            if ((board[row_index][column_index] == board[row_index+1][column_index-1]) && 
+                    (board[row_index][column_index] == 'X')) {
+                // std::cout << "got match";
+                current_match = true;
+                count_same += 1;
+            } else {
+                current_match = false;
+                count_same = 1;
+            }
+
+            if ((current_match == true) && (count_same == 4)) {
+                return 1;
+            }
+            
             row_index += 1;
             column_index -= 1;
         }
-        std::cout << " \n" << std::endl;
+        // std::cout << " \n" << std::endl;
     }
 
     current_match = false;
@@ -148,13 +185,78 @@ int check_for_winner(char board[BOARD_ROWS][BOARD_COLUMNS]) {
             // std::cout << "i" << i << "j" << j << std::endl;            
         }       
     }
-
+    
     return 0;
 }
 
-int main() {    
-    char board[BOARD_ROWS][BOARD_COLUMNS];
 
+void tests(char board[BOARD_ROWS][BOARD_COLUMNS]) {
+    // test winner horizontal
+    move(board, 1, 'X');
+    move(board, 2, 'X');
+    move(board, 3, 'X');
+    move(board, 4, 'X');
+    if (check_for_winner(board))  {
+        std::cout << "Pass" << std::endl;
+    }
+    
+    move(board, 3, 'X');
+    move(board, 6, 'X');
+    move(board, 2, 'O');
+    move(board, 5, 'X');
+    print_board(board);
+    std::cout << "winner " << check_for_winner(board);
+    valid_moves(board);
+    move(board, 1, 'O'); 
+    move(board, 1, 'O'); 
+    move(board, 2, 'O');
+  
+    move(board, 1, 'X');
+    print_board(board);
+    std::cout << "winner " << check_for_winner(board);
+    valid_moves(board);
+    move(board, 1, 'X');
+    move(board, 1, 'X'); 
+    move(board, 5, 'X');
+    move(board, 4, 'X');
+    move(board, 1, 'X');
+    move(board, 5, 'X');
+    move(board, 4, 'X');
+    move(board, 6, 'X');
+    move(board, 6, 'X');
+    move(board, 6, 'X');
+    move(board, 2, 'X');
+    move(board, 2, 'X');
+    print_board(board);
+    valid_moves(board);
+}
+
+/* 
+   prints welcome screen at start of game
+*/
+void print_welcome() {
+    std::cout << "Welcome To Connect 4\n\n"
+            " Use the below numbers to choose a space:\n"
+            " 1 2 3 4 5 6 7\n"
+            " _ _ _ _ _ _ _\n"
+            " _ _ _ _ _ _ _\n"
+            " _ _ _ _ _ _ _\n"
+            " _ _ _ _ _ _ _\n"
+            " _ _ _ _ _ _ _\n"
+            " _ _ _ _ _ _ _\n\n";
+}
+
+int main() {    
+    Player player_1 = HUMAN;
+    Player current_player = HUMAN;
+    std::string go_first_answer = ""; 
+    int position = -1;
+    bool game_over = false;
+    bool move_completed = false;
+    char current_symbol = 'X';
+    char winner = '_';
+    bool is_tie = false;
+    char board[BOARD_ROWS][BOARD_COLUMNS];    
     // fill board
     for (int i = 0; i < BOARD_ROWS; i++){
         for (int j = 0; j < BOARD_COLUMNS; j++){
@@ -162,33 +264,55 @@ int main() {
         }
     }   
     
-    move(board, 1, 'X');
-    move(board, 3, 'X');
-    move(board, 6, 'X');
-    move(board, 2, 'O');
-    move(board, 5, 'X');
-    move(board, 4, 'X');
-    move(board, 1, 'O'); 
-    move(board, 1, 'O'); 
-    move(board, 1, 'O');
-    move(board, 1, 'X');
-    move(board, 1, 'X'); 
-    move(board, 5, 'X');
-    move(board, 4, 'X');
-    move(board, 3, 'X');
-    move(board, 5, 'X');
-    move(board, 4, 'X');
-    move(board, 3, 'X');
-    move(board, 6, 'X');
-    move(board, 6, 'X');
-    move(board, 6, 'X');
-    move(board, 2, 'X');
-    move(board, 2, 'X');
-    move(board, 2, 'X');
+    print_welcome();
+
+    std::cout << "Do you want to go first? \n (y / n) >> ";
+    std::cin >> go_first_answer;
+    if (go_first_answer == "n") {        
+        player_1 = COMPUTER;
+        current_player = COMPUTER;
+    }
+    std::cout << std::endl;
+
     print_board(board);
-    valid_moves(board);
+
+    while(!game_over) {
+        // set symbol of current player
+        if (current_player == player_1) {
+            current_symbol = 'X';
+        } else {
+            current_symbol = 'O';
+        }
+        
+        if (current_player == COMPUTER) {  
+            // board[computer_turn(board, player_1)] = current_symbol;
+            current_player = HUMAN;
+            // std::cout << "Computer Turn" << std::endl;
+        } else {            
+            move_completed = false;
+            while (!move_completed) {
+                std::cout << "Pick a Position from 1-7 : \n >> ";
+                std::cin >> position;
+                std::cout << std::endl;
+                if (is_move_valid(board, position)) {
+                    move(board, position, current_symbol);      
+                    move_completed = true;
+                    current_player = COMPUTER;
+                    std::cout << "Your Selection" << std::endl;
+                } else {
+                    std::cout << "Move is not Valid!" << std::endl;
+                }                
+            }           
+        }
+        print_board(board);   
+        winner = check_for_winner(board); 
+        if (winner) {
+            std::cout << "winner is " << winner << std::endl;
+            game_over = true;
+        }  
     
-    std::cout << check_for_winner(board);
-   
+    }
+
+    // tests(board);
     return 0;
 }
